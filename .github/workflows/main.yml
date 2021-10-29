@@ -12,7 +12,7 @@ jobs:
           ls ${{ github.workspace }}
       - name: Hello world action step
         id: hello
-        uses: digitalreplica/hello-world-javascript-action@v1.1
+        uses: digitalreplica/hello-world-javascript-action@main
         with:
           who-to-greet: 'Mona the Octocat'
       # Use the output from the `hello` step
