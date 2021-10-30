@@ -127,4 +127,9 @@ async function run() {
 
 }
 
-run();
+// Run main function, setting failure on error
+try {
+  run();
+} catch (error) {
+  core.setFailed(error.message);
+}
