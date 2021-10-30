@@ -11,8 +11,8 @@ async function run() {
     const octokit = github.getOctokit(myToken)
 
     const branches = await octokit.rest.repos.listBranches({
-      'digitalreplica',
-      'hacking',
+      owner: 'digitalreplica',
+      repo: 'hacking'
     });
 
     console.log(branches);
