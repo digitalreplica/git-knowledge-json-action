@@ -74,6 +74,7 @@ async function run() {
   // * one line per repo, formatted like '<owner>/repo'
   // * ex: 'digitalreplica/hacking'
   const reposListPath = core.getInput('repo-list-path');
+  console.log(`Reading list of repos from ${reposListPath}`)
   const reposData = fs.readFileSync(reposListPath, {encoding:'utf8', flag:'r'});
   const repos = reposData.split(/\r?\n/);
 
@@ -81,12 +82,13 @@ async function run() {
   let owner, repo;
   for (let ownerRepo of repos) {
     if (ownerRepo.length == 0) { continue; }
+    console.log(`Processing repo ${ownerRepo}`)
     [owner, repo] = ownerRepo.split('/');
     const repoMarkdownFiles = await getRepoMarkdownFiles(
       octokit, owner, repo
     );
     for (file of repoMarkdownFiles) {
-      console.log(file.html_url);
+      console.log(`  ${file.html_url}`);
       let filenameWithRepo = `${owner}/${repo}/${file.path}`
       // Add subset of file properties to files
       knowledgeData.files[filenameWithRepo] = {
@@ -120,7 +122,7 @@ async function run() {
     if (err) {
         throw err;
     }
-    console.log("Knowledge data saved to knowledge.json");
+    console.log(`Knowledge data saved to ${knowledgeJsonPath}`);
   });
 
 }
