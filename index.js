@@ -62,74 +62,69 @@ function getTagsForUrl(url) {
 }
 
 async function run() {
-  const myToken = core.getInput('repo-token');
-  //const myToken = process.env.GITHUB_TOKEN;
-  const octokit = github.getOctokit(myToken)
-  const knowledgeData = {
-    tags: {},
-    files: {},
-  }
+  try {
+    const myToken = core.getInput('repo-token');
+    //const myToken = process.env.GITHUB_TOKEN;
+    const octokit = github.getOctokit(myToken)
+    const knowledgeData = {
+      tags: {},
+      files: {},
+    }
 
-  // Read list of repos from repos.txt
-  // * one line per repo, formatted like '<owner>/repo'
-  // * ex: 'digitalreplica/hacking'
-  const reposListPath = core.getInput('repo-list-path');
-  console.log(`Reading list of repos from ${reposListPath}`)
-  const reposData = fs.readFileSync(reposListPath, {encoding:'utf8', flag:'r'});
-  const repos = reposData.split(/\r?\n/);
+    // Read list of repos from repos.txt
+    // * one line per repo, formatted like '<owner>/repo'
+    // * ex: 'digitalreplica/hacking'
+    const reposListPath = core.getInput('repo-list-path');
+    console.log(`Reading list of repos from ${reposListPath}`)
+    const reposData = fs.readFileSync(reposListPath, {encoding:'utf8', flag:'r'});
+    const repos = reposData.split(/\r?\n/);
 
-  // Loop over all repos, given as owner/repo strings
-  let owner, repo;
-  for (let ownerRepo of repos) {
-    if (ownerRepo.length == 0) { continue; }
-    console.log(`Processing ${ownerRepo}`);
-    [owner, repo] = ownerRepo.split('/');
-    const repoMarkdownFiles = await getRepoMarkdownFiles(
-      octokit, owner, repo
-    );
-    for (file of repoMarkdownFiles) {
-      console.log(`  ${file.html_url}`);
-      let filenameWithRepo = `${owner}/${repo}/${file.path}`
-      // Add subset of file properties to files
-      knowledgeData.files[filenameWithRepo] = {
-        name: file.name,
-        path: file.path,
-        size: file.size,
-        html_url: file.html_url,
-        repo: ownerRepo
-      }
+    // Loop over all repos, given as owner/repo strings
+    let owner, repo;
+    for (let ownerRepo of repos) {
+      if (ownerRepo.length == 0) { continue; }
+      console.log(`Processing ${ownerRepo}`);
+      [owner, repo] = ownerRepo.split('/');
+      const repoMarkdownFiles = await getRepoMarkdownFiles(
+        octokit, owner, repo
+      );
+      for (file of repoMarkdownFiles) {
+        console.log(`  ${file.html_url}`);
+        let filenameWithRepo = `${owner}/${repo}/${file.path}`
+        // Add subset of file properties to files
+        knowledgeData.files[filenameWithRepo] = {
+          name: file.name,
+          path: file.path,
+          size: file.size,
+          html_url: file.html_url,
+          repo: ownerRepo
+        }
 
-      // Add files to a list under each tag
-      let tags = getTagsForUrl(file.html_url);
-      for (let tag of tags) {
-        if (knowledgeData.tags[tag]) {
-          knowledgeData.tags[tag].push(filenameWithRepo)
-        } else {
-          knowledgeData.tags[tag] = []
-          knowledgeData.tags[tag].push(filenameWithRepo)
+        // Add files to a list under each tag
+        let tags = getTagsForUrl(file.html_url);
+        for (let tag of tags) {
+          if (knowledgeData.tags[tag]) {
+            knowledgeData.tags[tag].push(filenameWithRepo)
+          } else {
+            knowledgeData.tags[tag] = []
+            knowledgeData.tags[tag].push(filenameWithRepo)
+          }
         }
       }
     }
-  }
-  //console.log(knowledgeData)
+    //console.log(knowledgeData)
 
-  // convert JSON object to string
-  const jsonKnowledgeData = JSON.stringify(knowledgeData, null, 1);
+    // convert JSON object to string
+    const jsonKnowledgeData = JSON.stringify(knowledgeData, null, 1);
 
-  // write JSON string to a file
-  const knowledgeJsonPath = core.getInput('knowledge-json-path');
-  fs.writeFile(knowledgeJsonPath, jsonKnowledgeData, (err) => {
-    if (err) {
-        throw err;
-    }
+    // write JSON string to a file
+    const knowledgeJsonPath = core.getInput('knowledge-json-path');
+    fs.writeFileSync(knowledgeJsonPath, jsonKnowledgeData);
     console.log(`Knowledge data saved to ${knowledgeJsonPath}`);
-  });
-
+  } catch (error) {
+    core.setFailed(error.message);
+  }
 }
 
 // Run main function, setting failure on error
-try {
-  run();
-} catch (error) {
-  core.setFailed(error.message);
-}
+run();
