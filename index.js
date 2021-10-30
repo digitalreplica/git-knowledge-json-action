@@ -82,7 +82,7 @@ async function run() {
   let owner, repo;
   for (let ownerRepo of repos) {
     if (ownerRepo.length == 0) { continue; }
-    console.log(`Processing ${ownerRepo}`)
+    console.log(`Processing ${ownerRepo}`);
     [owner, repo] = ownerRepo.split('/');
     const repoMarkdownFiles = await getRepoMarkdownFiles(
       octokit, owner, repo
