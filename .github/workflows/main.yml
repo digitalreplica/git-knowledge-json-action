@@ -11,6 +11,8 @@ jobs:
         uses: digitalreplica/hello-world-javascript-action@main
         with:
           repo-token: '${{ secrets.GITHUB_TOKEN }}'
+          repo-list-path: 'repos-doesnt-exist.txt'
+          knowledge-json-path: 'knowledge.json'
       - name: List files in the repository
         run: |
           ls -l ${{ github.workspace }}
