@@ -1,7 +1,7 @@
-name: 'Hello World'
-description: 'Greet someone and record the time'
+name: 'Git-knowledge Json Action'
+description: 'Creates a git-knowledge json file'
 inputs:
-  repo-token:  # id of input
+  repo-token:
     description: 'GitHub Token'
     required: true
     default: ''
@@ -12,7 +12,7 @@ inputs:
   knowledge-json-path:
     description: 'Path to knowledge output file'
     required: true
-    default: 'knowledge.json'
+    default: 'src/assets/knowledge.json'
 runs:
   using: 'node12'
   main: 'index.js'
